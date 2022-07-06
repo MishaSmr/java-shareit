@@ -8,10 +8,8 @@ import ru.practicum.shareit.exceptions.UserNotDefinedException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.InMemoryUserRepository;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,10 +50,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> getAllForUser(Long userId) {
         isUserDefined(userId);
-        return itemRepository.getAll().stream().
-                filter(i -> i.getOwner().getId() == userId).
-                map(ItemMapper::toItemDto).
-                collect(Collectors.toList());
+        return itemRepository.getAll().stream()
+                .filter(i -> i.getOwner().getId() == userId)
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -64,12 +62,12 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         String t = text.toLowerCase();
-        return itemRepository.getAll().stream().
-                filter(i -> i.getDescription().toLowerCase().contains(t) ||
-                        i.getName().toLowerCase().contains(t)).
-                filter(Item::getAvailable).
-                map(ItemMapper::toItemDto).
-                collect(Collectors.toList());
+        return itemRepository.getAll().stream()
+                .filter(i -> i.getDescription().toLowerCase().contains(t) ||
+                        i.getName().toLowerCase().contains(t))
+                .filter(Item::getAvailable)
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     private void isUserDefined(Long userId) {

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.requests;
 
-import ru.practicum.shareit.user.User;
 
 import java.util.Collection;
 

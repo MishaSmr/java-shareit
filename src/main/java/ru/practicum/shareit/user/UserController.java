@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.ValidationException;
 
@@ -32,7 +31,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public void remove (@PathVariable Long id) {
+    public void remove(@PathVariable Long id) {
         userRepository.remove(id);
     }
 

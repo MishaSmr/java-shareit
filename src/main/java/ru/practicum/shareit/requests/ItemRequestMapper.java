@@ -7,12 +7,12 @@ public class ItemRequestMapper {
 
     private static UserRepository userRepository;
 
-    public static ItemRequestDto toItemRequestDto (ItemRequest itemRequest) {
+    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
         return new ItemRequestDto(
-           itemRequest.getId(),
-           itemRequest.getDescription(),
-           itemRequest.getRequester().getId(),
-           itemRequest.getCreated()
+                itemRequest.getId(),
+                itemRequest.getDescription(),
+                itemRequest.getRequester().getId(),
+                itemRequest.getCreated()
         );
     }
 }
