@@ -36,7 +36,7 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User create(User user) {
         validator.validateUser(user);
-        isEmailExists(user);
+        isEmailExists(user.getEmail());
         user.setId(id++);
         users.put(user.getId(), user);
         log.debug("Текущее количество пользователей: {}", users.size());
@@ -60,9 +60,9 @@ public class InMemoryUserRepository implements UserRepository {
         return user;
     }
 
-    public void isEmailExists(User user) {
+    public void isEmailExists(String email) {
         for (User u : users.values()) {
-            if (u.getEmail().equals(user.getEmail())) {
+            if (u.getEmail().equals(email)) {
                 log.warn("Пользователь с таким e-mail уже существует");
                 throw new UserAlreadyExistsException("Пользователь с таким e-mail уже существует");
             }
