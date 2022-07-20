@@ -36,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
         itemRepository.checkItemId(bookingDto.getItemId());
         Item item = itemRepository.getReferenceById(bookingDto.getItemId());
         if (item.getOwner().getId() == bookerId) {
-            throw new UserNotFoundException ("Пользователь - владелец предмета");
+            throw new UserNotFoundException("Пользователь - владелец предмета");
         }
         if (item.getAvailable()) {
             checkDate(bookingDto.getStart(), bookingDto.getEnd());

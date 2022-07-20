@@ -22,7 +22,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByBooker_IdAndStatus(Long bookerId, Status status, Sort sort);
 
-    List<Booking> findByItem_Id(Long ItemId);
+    List<Booking> findByItem_Id(Long itemId);
 
     @Query(" select b from Booking b " +
             "where b.booker = ?1 " +

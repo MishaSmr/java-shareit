@@ -32,7 +32,7 @@ public class BookingMapper {
         );
     }
 
-    public static BookingExtDto toBookingExtDto (Booking booking) {
+    public static BookingExtDto toBookingExtDto(Booking booking) {
         return new BookingExtDto(
                 booking.getId(),
                 booking.getStart(),

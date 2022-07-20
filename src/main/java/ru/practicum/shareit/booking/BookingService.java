@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface BookingService {
 
-    BookingDto create (Long bookerId, BookingDto bookingDto);
+    BookingDto create(Long bookerId, BookingDto bookingDto);
 
-    BookingExtDto changeStatus (Long userId, Long bookingId, Boolean approved);
+    BookingExtDto changeStatus(Long userId, Long bookingId, Boolean approved);
 
-    BookingExtDto getById (Long userId, Long bookingId);
+    BookingExtDto getById(Long userId, Long bookingId);
 
     List<BookingExtDto> getForBooker(Long bookerId, String state);
 
