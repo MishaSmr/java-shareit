@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.exceptions.BookingNotFoundException;
 
 import javax.persistence.EntityNotFoundException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -16,9 +16,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByBooker_IdAndItem_Id(Long bookerId, Long itemId);
 
-    List<Booking> findByBooker_IdAndEndIsBefore(Long bookerId, LocalDate date, Sort sort);
+    List<Booking> findByBooker_IdAndEndIsBefore(Long bookerId, LocalDateTime date, Sort sort);
 
-    List<Booking> findByBooker_IdAndStartIsAfter(Long bookerId, LocalDate date, Sort sort);
+    List<Booking> findByBooker_IdAndStartIsAfter(Long bookerId, LocalDateTime date, Sort sort);
 
     List<Booking> findByBooker_IdAndStatus(Long bookerId, Status status, Sort sort);
 
@@ -29,7 +29,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "and b.start <= ?2 and b.end >= ?2 " +
             "and b.status = 'APPROVED' " +
             "order by b.start desc")
-    List<Booking> getCurrentForBooker(Long bookerId, LocalDate date);
+    List<Booking> getCurrentForBooker(Long bookerId, LocalDateTime date);
 
     default void checkBookingId(Long bookingId) {
         try {

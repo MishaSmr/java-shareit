@@ -18,6 +18,7 @@ import ru.practicum.shareit.item.dto.ItemExtDto;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -109,7 +110,7 @@ public class ItemServiceImpl implements ItemService {
             throw new CommentCreateException("Пользователь не брал предмет в аренду");
         }
         for (Booking b : bookings) {
-            if (!b.getEnd().isAfter(LocalDate.now())) {
+            if (!b.getEnd().isAfter(LocalDateTime.now())) {
                 comment.setItem(itemRepository.getReferenceById(itemId));
                 comment.setAuthor(userRepository.getReferenceById(userId));
                 comment.setCreated(LocalDate.now());
@@ -129,18 +130,12 @@ public class ItemServiceImpl implements ItemService {
     private ItemExtDto createItemExtDto(Item i) {
         ItemExtDto itemDto = ItemMapper.toItemExtDto(i);
         BookingDto lastBooking = bookingRepository.findByItem_Id(i.getId()).stream()
-                .filter(b -> b.getEnd().isBefore(LocalDate.now()) || b.getEnd().isEqual(LocalDate.now())
-                        || (b.getStart().isBefore(LocalDate.now()) && b.getEnd().isAfter(LocalDate.now())))
+                .filter(b -> b.getEnd().isBefore(LocalDateTime.now())
+                        || (b.getStart().isBefore(LocalDateTime.now()) && b.getEnd().isAfter(LocalDateTime.now())))
                 .max(Comparator.comparing(Booking::getEnd))
                 .map(BookingMapper::toBookingDto).orElse(null);
         BookingDto nextBooking = bookingRepository.findByItem_Id(i.getId()).stream()
-                .filter(b -> b.getStart().isAfter(LocalDate.now()) || b.getStart().isEqual(LocalDate.now()))
-                .filter(b -> {
-                    if (lastBooking == null) {
-                        return false;
-                    }
-                    return b.getId() != lastBooking.getId();
-                })
+                .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
                 .min(Comparator.comparing(Booking::getStart))
                 .map(BookingMapper::toBookingDto).orElse(null);
 

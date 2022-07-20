@@ -12,7 +12,7 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -99,13 +99,13 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findByBooker_Id(bookerId, sort);
                 break;
             case CURRENT:
-                bookings = bookingRepository.getCurrentForBooker(bookerId, LocalDate.now());
+                bookings = bookingRepository.getCurrentForBooker(bookerId, LocalDateTime.now());
                 break;
             case PAST:
-                bookings = bookingRepository.findByBooker_IdAndEndIsBefore(bookerId, LocalDate.now(), sort);
+                bookings = bookingRepository.findByBooker_IdAndEndIsBefore(bookerId, LocalDateTime.now(), sort);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(bookerId, LocalDate.now(), sort);
+                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(bookerId, LocalDateTime.now(), sort);
                 break;
             default:
                 bookings = bookingRepository.findByBooker_IdAndStatus(bookerId, Status.valueOf(state), sort);
@@ -133,17 +133,17 @@ public class BookingServiceImpl implements BookingService {
                 return bookings.stream().map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
             case CURRENT:
                 return bookings.stream()
-                        .filter(b -> (b.getStart().isBefore(LocalDate.now()) || b.getStart().isEqual(LocalDate.now()))
-                                && (b.getEnd().isAfter(LocalDate.now()) || b.getEnd().isEqual(LocalDate.now()))
+                        .filter(b -> b.getStart().isBefore(LocalDateTime.now())
+                                && b.getEnd().isAfter(LocalDateTime.now())
                                 && b.getStatus().equals(Status.APPROVED))
                         .map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
             case PAST:
                 return bookings.stream()
-                        .filter(b -> b.getEnd().isBefore(LocalDate.now()))
+                        .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
                         .map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
             case FUTURE:
                 return bookings.stream()
-                        .filter(b -> b.getStart().isAfter(LocalDate.now()))
+                        .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
                         .map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
             default:
                 return bookings.stream()
@@ -159,8 +159,8 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void checkDate(LocalDate start, LocalDate end) {
-        if (start.isBefore(LocalDate.now()) || end.isBefore(LocalDate.now()) || start.isAfter(end)) {
+    private void checkDate(LocalDateTime start, LocalDateTime end) {
+        if (start.isBefore(LocalDateTime.now()) || end.isBefore(LocalDateTime.now()) || start.isAfter(end)) {
             throw new BookingDateException("Указаны неверные даты бронирования");
         }
     }
