@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.web.bind.annotation.PathVariable;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemExtDto;
 
 import java.util.Collection;
 
@@ -11,9 +12,11 @@ public interface ItemService {
 
     ItemDto update(Long itemId, Long userId, ItemDto itemDto);
 
-    ItemDto getItem(@PathVariable Long itemId);
+    ItemExtDto getItem(Long itemId, Long userId);
 
-    Collection<ItemDto> getAllForUser(Long userId);
+    Collection<ItemExtDto> getAllForUser(Long userId);
 
     Collection<ItemDto> search(String text);
+
+    CommentDto createComment(Long itemId, Long userId, CommentDto commentDto);
 }

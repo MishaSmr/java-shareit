@@ -13,7 +13,7 @@ import java.util.Collection;
 @RequestMapping(path = "/users")
 public class UserController {
 
-    private final InMemoryUserRepository userRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
 
     @GetMapping
@@ -33,7 +33,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public void remove(@PathVariable Long id) {
-        userRepository.remove(id);
+        userRepository.deleteById(id);
     }
 
     @PatchMapping("/{id}")

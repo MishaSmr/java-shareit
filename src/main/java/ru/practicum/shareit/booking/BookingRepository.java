@@ -1,16 +1,43 @@
 package ru.practicum.shareit.booking;
 
-import java.util.Collection;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import ru.practicum.shareit.exceptions.BookingNotFoundException;
 
-public interface BookingRepository {
+import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
 
-    Booking get(Long id);
 
-    Collection<Booking> getAll();
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    Booking create(Booking booking);
+    List<Booking> findByBooker_Id(Long bookerId, Sort sort);
 
-    void remove(long id);
+    List<Booking> findByBooker_IdAndItem_Id(Long bookerId, Long itemId);
 
-    Booking update(Booking booking);
+    List<Booking> findByBooker_IdAndEndIsBefore(Long bookerId, LocalDateTime date, Sort sort);
+
+    List<Booking> findByBooker_IdAndStartIsAfter(Long bookerId, LocalDateTime date, Sort sort);
+
+    List<Booking> findByBooker_IdAndStatus(Long bookerId, Status status, Sort sort);
+
+    List<Booking> findByItem_Id(Long itemId);
+
+    @Query(" select b from Booking b " +
+            "where b.booker = ?1 " +
+            "and b.start <= ?2 and b.end >= ?2 " +
+            "and b.status = 'APPROVED' " +
+            "order by b.start desc")
+    List<Booking> getCurrentForBooker(Long bookerId, LocalDateTime date);
+
+    default void checkBookingId(Long bookingId) {
+        try {
+            Booking booking = getReferenceById(bookingId);
+            BookingMapper.toBookingDto(booking);
+        } catch (EntityNotFoundException ex) {
+            throw new BookingNotFoundException("Бронирование c таким id не найдено.");
+        }
+    }
+
 }
