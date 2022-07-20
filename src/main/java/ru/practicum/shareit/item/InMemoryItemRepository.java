@@ -11,13 +11,12 @@ import java.util.HashMap;
 @Component("inMemoryItemRepository")
 @Slf4j
 @RequiredArgsConstructor
-public class InMemoryItemRepository implements ItemRepository {
+public class InMemoryItemRepository {
 
     private final HashMap<Long, Item> items = new HashMap<>();
     private long id = 1;
     private final ItemValidator validator;
 
-    @Override
     public Item get(Long id) {
         if (!items.containsKey(id)) {
             log.warn("Предмет c таким id не найден.");
@@ -26,12 +25,10 @@ public class InMemoryItemRepository implements ItemRepository {
         return items.get(id);
     }
 
-    @Override
     public Collection<Item> getAll() {
         return items.values();
     }
 
-    @Override
     public Item create(Item item) {
         validator.validateItem(item);
         item.setId(id++);
@@ -40,7 +37,6 @@ public class InMemoryItemRepository implements ItemRepository {
         return item;
     }
 
-    @Override
     public void remove(Item item) {
         if (!items.containsKey(id)) {
             log.warn("Предмет c таким id не найден.");
@@ -49,7 +45,6 @@ public class InMemoryItemRepository implements ItemRepository {
         items.remove(item.getId());
     }
 
-    @Override
     public Item update(Item item) {
         validator.validateItem(item);
         items.put(item.getId(), item);

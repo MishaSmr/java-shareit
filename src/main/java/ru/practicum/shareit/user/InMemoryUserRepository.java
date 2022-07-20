@@ -12,19 +12,17 @@ import java.util.HashMap;
 @Component("inMemoryUserRepository")
 @Slf4j
 @RequiredArgsConstructor
-public class InMemoryUserRepository implements UserRepository {
+public class InMemoryUserRepository {
 
     private final HashMap<Long, User> users = new HashMap<>();
     private long id = 1;
 
     private final UserValidator validator;
 
-    @Override
     public Collection<User> getAll() {
         return users.values();
     }
 
-    @Override
     public User get(Long id) {
         if (!users.containsKey(id)) {
             log.warn("Пользователь c таким id не найден.");
@@ -33,7 +31,6 @@ public class InMemoryUserRepository implements UserRepository {
         return users.get(id);
     }
 
-    @Override
     public User create(User user) {
         validator.validateUser(user);
         isEmailExists(user.getEmail());
@@ -43,7 +40,6 @@ public class InMemoryUserRepository implements UserRepository {
         return user;
     }
 
-    @Override
     public void remove(long id) {
         if (!users.containsKey(id)) {
             log.warn("Пользователь не найден.");
@@ -52,7 +48,6 @@ public class InMemoryUserRepository implements UserRepository {
         users.remove(id);
     }
 
-    @Override
     public User update(User user) {
         validator.validateUser(user);
         users.put(user.getId(), user);

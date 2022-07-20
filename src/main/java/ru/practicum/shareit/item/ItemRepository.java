@@ -1,15 +1,28 @@
 package ru.practicum.shareit.item;
 
-import java.util.Collection;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import ru.practicum.shareit.exceptions.UserNotFoundException;
 
-public interface ItemRepository {
-    Item get(Long id);
+import javax.persistence.EntityNotFoundException;
+import java.util.List;
 
-    Collection<Item> getAll();
+public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    Item create(Item item);
+    List<Item> findByOwner_Id(Long userId);
 
-    void remove(Item item);
+    @Query(" select i from Item i " +
+            "where upper(i.name) like upper(concat('%', ?1, '%')) " +
+            " or upper(i.description) like upper(concat('%', ?1, '%'))" +
+            " and i.available = true")
+    List<Item> search(String text);
 
-    Item update(Item item);
+    default void checkItemId(Long itemId) {
+        try {
+            Item item = getReferenceById(itemId);
+            ItemMapper.toItemDto(item);
+        } catch (EntityNotFoundException ex) {
+            throw new UserNotFoundException("Предмет c таким id не найден.");
+        }
+    }
 }
