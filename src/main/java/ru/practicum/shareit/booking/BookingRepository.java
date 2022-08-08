@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.exceptions.BookingNotFoundException;
@@ -12,24 +13,54 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByBooker_Id(Long bookerId, Sort sort);
+    Page<Booking> findByBooker_Id(Long bookerId, Pageable pageable);
 
     List<Booking> findByBooker_IdAndItem_Id(Long bookerId, Long itemId);
 
-    List<Booking> findByBooker_IdAndEndIsBefore(Long bookerId, LocalDateTime date, Sort sort);
+    Page<Booking> findByBooker_IdAndEndIsBefore(Long bookerId, LocalDateTime date, Pageable pageable);
 
-    List<Booking> findByBooker_IdAndStartIsAfter(Long bookerId, LocalDateTime date, Sort sort);
+    Page<Booking> findByBooker_IdAndStartIsAfter(Long bookerId, LocalDateTime date, Pageable pageable);
 
-    List<Booking> findByBooker_IdAndStatus(Long bookerId, Status status, Sort sort);
+    Page<Booking> findByBooker_IdAndStartIsBeforeAndEndIsAfter(Long bookerId, LocalDateTime date1, LocalDateTime date2,
+                                                               Pageable pageable);
+
+    Page<Booking> findByBooker_IdAndStatus(Long bookerId, Status status, Pageable pageable);
 
     List<Booking> findByItem_Id(Long itemId);
 
-    @Query(" select b from Booking b " +
-            "where b.booker = ?1 " +
-            "and b.start <= ?2 and b.end >= ?2 " +
-            "and b.status = 'APPROVED' " +
-            "order by b.start desc")
-    List<Booking> getCurrentForBooker(Long bookerId, LocalDateTime date);
+    @Query(" select new Booking(b.id, b.start, b.end, b.item, b.booker, b.status) from Booking b " +
+            "left outer join Item i on b.item = i " +
+            "left outer join User u on u = i.owner " +
+            "where u.id = ?1")
+    Page<Booking> getAllForOwner(Long userId, Pageable pageable);
+
+    @Query(" select new Booking(b.id, b.start, b.end, b.item, b.booker, b.status) from Booking b " +
+            "left outer join Item i on b.item = i " +
+            "left outer join User u on u = i.owner " +
+            "where u.id = ?1 " +
+            "and b.start < ?2 and b.end > ?2")
+    Page<Booking> getCurrentForOwner(Long userId, LocalDateTime localDateTime, Pageable pageable);
+
+    @Query(" select new Booking(b.id, b.start, b.end, b.item, b.booker, b.status) from Booking b " +
+            "left outer join Item i on b.item = i " +
+            "left outer join User u on u = i.owner " +
+            "where u.id = ?1 " +
+            "and b.end < ?2")
+    Page<Booking> getPastForOwner(Long userId, LocalDateTime localDateTime, Pageable pageable);
+
+    @Query(" select new Booking(b.id, b.start, b.end, b.item, b.booker, b.status) from Booking b " +
+            "left outer join Item i on b.item = i " +
+            "left outer join User u on u = i.owner " +
+            "where u.id = ?1 " +
+            "and b.start > ?2")
+    Page<Booking> getFutureForOwner(Long userId, LocalDateTime localDateTime, Pageable pageable);
+
+    @Query(" select new Booking(b.id, b.start, b.end, b.item, b.booker, b.status) from Booking b " +
+            "left outer join Item i on b.item = i " +
+            "left outer join User u on u = i.owner " +
+            "where u.id = ?1 " +
+            "and b.status = ?2")
+    Page<Booking> getAllForOwnerAndStatus(Long userId, Status status, Pageable pageable);
 
     default void checkBookingId(Long bookingId) {
         try {

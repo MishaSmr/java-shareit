@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -13,9 +13,7 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,68 +86,62 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingExtDto> getForBooker(Long bookerId, String state) {
+    public List<BookingExtDto> getForBooker(Long bookerId, String state, Integer from, Integer size) {
         isUserDefined(bookerId);
         userRepository.checkUserId(bookerId);
         State st = State.valueOf(state.toUpperCase());
-        List<Booking> bookings;
+        Page<Booking> bookings;
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pageable pageable = PageRequest.of(from, size, sort);
         switch (st) {
             case ALL:
-                bookings = bookingRepository.findByBooker_Id(bookerId, sort);
+                bookings = bookingRepository.findByBooker_Id(bookerId, pageable);
                 break;
             case CURRENT:
-                bookings = bookingRepository.getCurrentForBooker(bookerId, LocalDateTime.now());
+                bookings = bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfter(bookerId,
+                        LocalDateTime.now(), LocalDateTime.now(), pageable);
                 break;
             case PAST:
-                bookings = bookingRepository.findByBooker_IdAndEndIsBefore(bookerId, LocalDateTime.now(), sort);
+                bookings = bookingRepository.findByBooker_IdAndEndIsBefore(bookerId, LocalDateTime.now(), pageable);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(bookerId, LocalDateTime.now(), sort);
+                bookings = bookingRepository.findByBooker_IdAndStartIsAfter(bookerId, LocalDateTime.now(), pageable);
                 break;
             default:
-                bookings = bookingRepository.findByBooker_IdAndStatus(bookerId, Status.valueOf(state), sort);
+                bookings = bookingRepository.findByBooker_IdAndStatus(bookerId, Status.valueOf(state), pageable);
         }
         return bookings.stream().map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingExtDto> getForOwner(Long userId, String state) {
+    public List<BookingExtDto> getForOwner(Long userId, String state, Integer from, Integer size) {
         isUserDefined(userId);
         userRepository.checkUserId(userId);
         if (itemRepository.findByOwner_Id(userId).isEmpty()) {
             log.warn("У пользователя нет предметов");
             return Collections.emptyList();
         }
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pageable pageable = PageRequest.of(from, size, sort);
         State st = State.valueOf(state.toUpperCase());
-        List<Booking> bookings = new ArrayList<>();
-        List<Item> items = itemRepository.findByOwner_Id(userId);
-        for (Item i : items) {
-            bookings.addAll(bookingRepository.findByItem_Id(i.getId()));
-        }
-        bookings.sort((Comparator.comparing(Booking::getStart)).reversed());
+        Page<Booking> bookings;
         switch (st) {
             case ALL:
-                return bookings.stream().map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
+                bookings = bookingRepository.getAllForOwner(userId, pageable);
+                break;
             case CURRENT:
-                return bookings.stream()
-                        .filter(b -> b.getStart().isBefore(LocalDateTime.now())
-                                && b.getEnd().isAfter(LocalDateTime.now())
-                                && b.getStatus().equals(Status.APPROVED))
-                        .map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
+                bookings = bookingRepository.getCurrentForOwner(userId, LocalDateTime.now(), pageable);
+                break;
             case PAST:
-                return bookings.stream()
-                        .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
-                        .map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
+                bookings = bookingRepository.getPastForOwner(userId, LocalDateTime.now(), pageable);
+                break;
             case FUTURE:
-                return bookings.stream()
-                        .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
-                        .map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
+                bookings = bookingRepository.getFutureForOwner(userId, LocalDateTime.now(), pageable);
+                break;
             default:
-                return bookings.stream()
-                        .filter(b -> b.getStatus() == Status.valueOf(state))
-                        .map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
+                bookings = bookingRepository.getAllForOwnerAndStatus(userId, Status.valueOf(state), pageable);
         }
+        return bookings.stream().map(BookingMapper::toBookingExtDto).collect(Collectors.toList());
     }
 
     private void isUserDefined(Long userId) {

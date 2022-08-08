@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingExtDto;
+import ru.practicum.shareit.exceptions.IncorrectParameterException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -36,13 +37,27 @@ public class BookingController {
 
     @GetMapping
     public List<BookingExtDto> getForBooker(@RequestHeader("X-Sharer-User-Id") Long bookerId,
-                                            @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getForBooker(bookerId, state);
+                                            @RequestParam(defaultValue = "ALL") String state,
+                                            @RequestParam(defaultValue = "0") Integer from,
+                                            @RequestParam(defaultValue = "10") Integer size) {
+        for (State s : State.values()) {
+            if (state.equals(s.toString())) {
+                return bookingService.getForBooker(bookerId, state, from, size);
+            }
+        }
+        throw new IncorrectParameterException("state", state);
     }
 
     @GetMapping("/owner")
     public List<BookingExtDto> getForOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                           @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getForOwner(userId, state);
+                                           @RequestParam(defaultValue = "ALL") String state,
+                                           @RequestParam(defaultValue = "0") Integer from,
+                                           @RequestParam(defaultValue = "10") Integer size) {
+        for (State s : State.values()) {
+            if (state.equals(s.toString())) {
+                return bookingService.getForOwner(userId, state, from, size);
+            }
+        }
+        throw new IncorrectParameterException("state", state);
     }
 }

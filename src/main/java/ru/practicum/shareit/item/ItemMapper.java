@@ -1,17 +1,13 @@
 package ru.practicum.shareit.item;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtDto;
-import ru.practicum.shareit.requests.ItemRequestRepository;
 
 import java.util.Collections;
 
 @Data
-@RequiredArgsConstructor
 public class ItemMapper {
-    private static ItemRequestRepository itemRequestRepository;
 
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(
@@ -19,7 +15,8 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() != null ? item.getRequest().getId() : null
+                item.getRequest() != null ? item.getRequest().getId() : null,
+                item.getOwner().getId()
         );
     }
 
@@ -30,8 +27,8 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 null,
-                itemDto.getRequestId() != null ? itemRequestRepository.get(itemDto.getRequestId()) : null
-                );
+                null
+        );
     }
 
     public static ItemExtDto toItemExtDto(Item item) {
@@ -41,6 +38,7 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getRequest() != null ? item.getRequest().getId() : null,
+                item.getOwner().getId(),
                 null,
                 null,
                 Collections.emptyList()
