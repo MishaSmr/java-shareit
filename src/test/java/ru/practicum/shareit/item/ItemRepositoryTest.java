@@ -58,7 +58,8 @@ class ItemRepositoryTest {
         long user2Id = userRepository.save(user2).getId();
         user.setId(userId);
         user2.setId(user2Id);
-        item2.setRequest(itemRequestRepository.save(itemRequest));
+        itemRequest.setId(itemRequestRepository.save(itemRequest).getId());
+        item2.setRequest(itemRequest);
         itemRepository.save(item);
         itemRepository.save(item2);
     }
