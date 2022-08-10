@@ -244,6 +244,16 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void testBookingGetForBookerByErrorState() {
+        IncorrectParameterException ex = Assertions.assertThrows(
+                IncorrectParameterException.class,
+                () ->
+                        bookingService.getForBooker(11L, "wrong", 0, 10));
+        Assertions.assertEquals("wrong",
+                ex.getValue());
+    }
+
+    @Test
     void testBookingGetForOwnerForUserWithoutItems() {
         when(userRepository.getReferenceById(anyLong()))
                 .thenReturn(user);
@@ -317,5 +327,15 @@ class BookingServiceImplTest {
         bookingService.getForOwner(11L, "WAITING", 0, 10);
         Mockito.verify(bookingRepository, Mockito.times(1))
                 .getAllForOwnerAndStatus(anyLong(), any(Status.class), any(Pageable.class));
+    }
+
+    @Test
+    void testBookingGetForOwnerByErrorState() {
+        IncorrectParameterException ex = Assertions.assertThrows(
+                IncorrectParameterException.class,
+                () ->
+                        bookingService.getForOwner(11L, "wrong", 0, 10));
+        Assertions.assertEquals("wrong",
+                ex.getValue());
     }
 }
