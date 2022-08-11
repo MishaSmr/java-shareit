@@ -2,6 +2,10 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -15,6 +19,7 @@ import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemExtDto;
+import ru.practicum.shareit.requests.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDate;
@@ -31,6 +36,8 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
+
     private final ItemValidator validator;
 
     @Transactional
@@ -41,6 +48,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = ItemMapper.toItem(itemDto);
         validator.validateItem(item);
         item.setOwner(userRepository.getReferenceById(userId));
+        Long requestId = itemDto.getRequestId();
+        item.setRequest(requestId != null ? itemRequestRepository.getReferenceById(requestId) : null);
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
@@ -73,10 +82,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemExtDto> getAllForUser(Long userId) {
+    public Collection<ItemExtDto> getAllForUser(Long userId, Integer from, Integer size) {
         isUserDefined(userId);
         List<ItemExtDto> result = new ArrayList<>();
-        List<Item> items = itemRepository.findByOwner_Id(userId);
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
+        Page<Item> items = itemRepository.findByOwner_Id(userId, pageable);
         if (items.isEmpty()) {
             return Collections.emptyList();
         }
@@ -87,11 +97,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> search(String text) {
+    public Collection<ItemDto> search(String text, Integer from, Integer size) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        return itemRepository.search(text).stream()
+        Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
+        return itemRepository.search(text, pageable).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
@@ -155,5 +166,9 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
         itemDto.setComments(comments);
         return itemDto;
+    }
+
+    public ItemValidator getValidator() {
+        return validator;
     }
 }

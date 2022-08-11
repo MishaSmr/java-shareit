@@ -56,4 +56,10 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("Пользователь c таким id не найден.");
         }
     }
+
+    @Transactional
+    @Override
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
 }

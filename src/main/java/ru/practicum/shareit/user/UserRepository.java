@@ -9,12 +9,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
 
-    default void checkUserId(Long userId) {
+    default boolean checkUserId(Long userId) {
         try {
             User user = getReferenceById(userId);
             UserMapper.toUserDto(user);
         } catch (EntityNotFoundException ex) {
             throw new UserNotFoundException("Пользователь c таким id не найден.");
         }
+        return true;
     }
 }

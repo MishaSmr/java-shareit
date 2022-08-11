@@ -1,17 +1,27 @@
 package ru.practicum.shareit.requests;
 
 
-import java.util.Collection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.practicum.shareit.exceptions.ItemRequestNotFoundException;
 
-public interface ItemRequestRepository {
+import javax.persistence.EntityNotFoundException;
+import java.util.List;
 
-    ItemRequest get(Long id);
+public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
 
-    Collection<ItemRequest> getAll();
+    List<ItemRequest> findByRequester_Id(Long userId);
 
-    ItemRequest create(ItemRequest itemRequest);
+    Page<ItemRequest> getAllByRequester_IdNot(Long userId, Pageable pageable);
 
-    void remove(long id);
+    default void checkItemRequestId(Long itemRequestId) {
+        try {
+            ItemRequest itemRequest = getReferenceById(itemRequestId);
+            ItemRequestMapper.toItemRequestDto(itemRequest);
+        } catch (EntityNotFoundException ex) {
+            throw new ItemRequestNotFoundException("Запрос c таким id не найдено.");
+        }
+    }
 
-    ItemRequest update(ItemRequest itemRequest);
 }
